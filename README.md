@@ -2,7 +2,7 @@
 
 I bought a DPScope for my electronic projects, but quickly found out it had only Windows software, but a relatively simple serial protocol.
 
-This software aims to pull data out of the device on any platform supported my matplotlib and PySerial.
+This software aims to pull data out of the device on any platform supported by matplotlib and PySerial.
 
 ## Usage
 
