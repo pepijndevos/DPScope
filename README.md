@@ -6,7 +6,15 @@ This software aims to pull data out of the device on any platform supported my m
 
 ## Usage
 
-FIXME: write
+    $ python dpscope/high.py 
+    0 /dev/tty.NXT-DevB-1
+    1 /dev/tty.VodaGPS-SPPslave-1
+    2 /dev/tty.Bluetooth-Modem
+    3 /dev/tty.Bluetooth-PDA-Sync
+    4 /dev/tty.usbserial-FTE0ZZ3K
+    Enter port number: 4
+
+![screenshot](https://raw.github.com/pepijndevos/DPScope/master/output.png)
 
 ## License
 
