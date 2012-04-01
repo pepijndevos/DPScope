@@ -31,7 +31,10 @@ class DPScope(serial.Serial):
     trig_pol = _cmd(22)
     def read_back(self, nob):
         self.write(chr(23)+chr(nob))
-        res = map(ord, self.read(2+(2*nob)))
+        status = self.read()
+        res = None
+        if status:
+            res = map(ord, self.read(1+(2*nob)))
         assert self.inWaiting() == 0, "%s unexpected unread bytes" % self.inWaiting()
         return res
 
