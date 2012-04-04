@@ -1,23 +1,23 @@
 from serial.tools.list_ports import comports
 from Tkinter import *
 
-def get_port():
-    root = Tk()
+def get_port(parent):
+    dialog = Toplevel(parent)
     ports = [p[0] for p in comports()]
     port = [None] # weird scope rules
 
     def finish():
         nr = int(list.curselection()[0])
         port[0] = ports[nr]
-        root.destroy()
+        dialog.destroy()
 
-    Label(root, text="Select serial port").pack()
-    list = Listbox(root)
+    Label(dialog, text="Select serial port").pack()
+    list = Listbox(dialog)
     list.pack(padx=5)
-    Button(root, text="OK", command=finish).pack()
+    Button(dialog, text="OK", command=finish).pack()
 
     for p in ports:
         list.insert(END, p)
 
-    root.wait_window(root)
+    parent.wait_window(dialog)
     return port[0]
