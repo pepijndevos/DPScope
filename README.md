@@ -1,4 +1,4 @@
-# dpscope
+# DPScope
 
 I bought a DPScope for my electronic projects, but quickly found out it had only Windows software, but a relatively simple serial protocol.
 
@@ -6,15 +6,9 @@ This software aims to pull data out of the device on any platform supported by m
 
 ## Usage
 
-    $ python dpscope/high.py 
-    0 /dev/tty.NXT-DevB-1
-    1 /dev/tty.VodaGPS-SPPslave-1
-    2 /dev/tty.Bluetooth-Modem
-    3 /dev/tty.Bluetooth-PDA-Sync
-    4 /dev/tty.usbserial-FTE0ZZ3K
-    Enter port number: 4
+    $ python dpscope/gui.py
 
-![screenshot](https://raw.github.com/pepijndevos/DPScope/master/output.png)
+![screenshot](https://raw.github.com/pepijndevos/DPScope/master/screenshot.png)
 
 ## License
 
