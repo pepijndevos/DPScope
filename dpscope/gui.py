@@ -5,10 +5,14 @@ from matplotlib.figure import Figure
 from portselect import get_port
 from Tkinter import *
 
+import high
+
 root = Tk()
 root.title("DPScope")
 fig = Figure()
-plt = fig.add_subplot(111)
+
+p = get_port(root)
+pltr = high.Plotter(p, fig)
 
 # the plot
 canvas = FigureCanvasTkAgg(fig, master=root)
@@ -44,9 +48,9 @@ trigger.pack(fill=BOTH, expand=1)
 
 # acquisition controls
 Button(acquisition, text="Start").pack(fill=X)
-Button(acquisition, text="Poll").pack(fill=X)
+Button(acquisition, text="Poll", command=pltr.poll).pack(fill=X)
 Button(acquisition, text="Stop").pack(fill=X)
-Button(acquisition, text="Clear").pack(fill=X)
+Button(acquisition, text="Clear", command=pltr.plot).pack(fill=X)
 Label(acquisition, text="Average").pack(fill=X)
 Spinbox(acquisition, from_=1, to=100, width=4).pack(fill=X)
 
