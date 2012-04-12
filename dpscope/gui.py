@@ -11,8 +11,8 @@ root = Tk()
 root.title("DPScope")
 fig = Figure()
 
-p = get_port(root)
-pltr = high.Plotter(p, fig)
+
+pltr = high.Plotter(fig)
 
 # the plot
 canvas = FigureCanvasTkAgg(fig, master=root)
@@ -63,10 +63,10 @@ Scale(levels, from_=-100, to=100, length=300).grid(sticky=E, row=1, column=1)
 Scale(levels, from_=-100, to=100, length=300).grid(sticky=E, row=1, column=2)
 
 # Display controls
-Checkbutton(display, text="Ch1").grid(sticky=W, row=0, column=1)
-Checkbutton(display, text="Ch2").grid(sticky=W, row=1, column=1)
-Checkbutton(display, text="X/Y").grid(sticky=W, row=2, column=1)
-Checkbutton(display, text="FFT").grid(sticky=W, row=3, column=1)
+Checkbutton(display, text="Ch1", variable=pltr.ch1b).grid(sticky=W, row=0, column=1)
+Checkbutton(display, text="Ch2", variable=pltr.ch2b).grid(sticky=W, row=1, column=1)
+Checkbutton(display, text="X/Y", variable=pltr._xy).grid(sticky=W, row=2, column=1)
+Checkbutton(display, text="FFT", variable=pltr._fft).grid(sticky=W, row=3, column=1)
 
 # Vertical controls
 gains = ["1 V/div", "0.5 V/div", "0.2 V/div", "0.1 V/div", "50 mV/div", "20 mV/div", "10 mV/div", "5 mV/div"]
@@ -114,5 +114,7 @@ Radiobutton(trigger, text="Falling", variable=trigger_pol, value=1).grid(sticky=
 Checkbutton(trigger, text="Noise reject").grid(sticky=W, row=1, column=3)
 
 
-#get_port(root)
+pltr.scope = get_port(root)
+pltr.scope.trig_source(0) # no default
+pltr.scope.cal_mode(1)
 root.mainloop()

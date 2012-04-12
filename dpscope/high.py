@@ -1,52 +1,88 @@
 from low import DPScope
 from numpy.fft import fft
+from multiprocessing.pool import ThreadPool
+from Tkinter import BooleanVar
 
 def channels(data):
-    return data[1::2], data[2::2]
-
-# scope modes
-A = 1
-B = 2
-AB = 3
-XY = 4
-AFFT = 5
-BFFT = 6
+    return data[0::2], data[1::2]
 
 class Plotter(object):
 
-    def __init__(self, port, fig):
-        self.scope = DPScope(port)
+    def __init__(self, fig):
+        self._scope = None
         self.fig = fig
         self.plt = fig.add_subplot(111)
         self.ch1, self.ch2 = self.plt.plot([], [], [], [])
+        self.pool = ThreadPool()
 
-        self.mode = AB
-        #self.scope.trig_source(0)
-        #self.scope.cal_mode(1)
+        self.ch1b = BooleanVar()
+        self.ch1b.set(True)
+
+        self.ch2b = BooleanVar()
+        self.ch2b.set(True)
+
+        self._fft = BooleanVar()
+        self._fft.set(False)
+
+        self._xy = BooleanVar()
+        self._xy.set(False)
+
+    @property
+    def scope(self):
+        return self._scope
+
+    @scope.setter
+    def scope(self, port):
+        self._scope = DPScope(port)
+
+    @property
+    def both_channels(self):
+        return self.ch1b.get() and self.ch2b.get()
+
+    @property
+    def xy(self):
+        return self._xy.get()
+
+    @property
+    def fft(self):
+        return self._fft.get()
+
+    def poll(self):
+        self.arm()
+        self.plot(*self.parse(self.read()))
+        self.scope.abort()
         
     def read(self, nofb=205):
         data = None
         while not data:
             data = self.scope.read_back(nofb)
 
-        if self.mode in [AB, XY]:
-            return channels(data)
-        elif self.mode in [AFFT, BFFT]:
-            return fft(data[1:]), []
-        elif self.mode in [A, B]:
-            return data[1:], []
+        return data[1:] # need first byte?
+
+    def parse(self, data):
+        ch1 = data
+        ch2 = []
+        if self.both_channels:
+            ch1, ch2 = channels(data)
+
+        if self.fft:
+            ch1 = fft(ch1)
+            ch2 = fft(ch2)
+
+        if self.xy:
+            return ch1, ch2, [], []
+        else:
+            return [], ch1, [], ch2
 
     def reader(self, nofb=205):
        while True:
            yield self.read(nofb)
 
     def arm(self):
-        if self.mode in [AB, XY]:
+        if self.both_channels:
             self.scope.arm(0)
-        elif self.mode in [AFFT, A]:
-            self.scope.arm_fft(0, 1)
-        elif self.mode in [BFFT, B]:
-            self.scope.arm_fft(0, 2)
+        else:
+            self.scope.arm_fft(0, self.ch1b.get() or self.ch2b.get()*2)
 
     def plot(self, x1=[], y1=[], x2=[], y2=[]):
         if len(y1) and not len(x1):
@@ -62,12 +98,4 @@ class Plotter(object):
         self.plt.autoscale_view()
         self.fig.canvas.draw()
 
-    def poll(self):
-        self.arm()
-        d1, d2 = self.read()
-        if self.mode == XY:
-            self.plot(x1=d1, y1=d2)
-        else:
-            self.plot(y1=d1, y2=d2)
-        self.scope.abort()
 
