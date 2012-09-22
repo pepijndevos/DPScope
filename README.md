@@ -6,6 +6,8 @@ This software aims to pull data out of the device on any platform supported by m
 
 ## Usage
 
+Install [usb serial driver](http://www.ftdichip.com/Drivers/VCP.htm)
+
     $ python dpscope/gui.py
 
 ![screenshot](https://raw.github.com/pepijndevos/DPScope/master/screenshot.png)
