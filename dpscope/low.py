@@ -66,7 +66,13 @@ class DPScope(serial.Serial):
     trig_level = _cmd(41, args='H')
     pre_gain = _cmd(41, args='BB')
     gain = _cmd(43, args='BB')
-    set_dac = _cmd(44, args='H') # weirdness
+    _set_dac = _cmd(44, args='BB')
+    def set_dac(self, ch, dac):
+        ch = 0x80 * (ch % 2)
+        B1 = (ch + 0x10) + (dac >> 8)
+        B2 = dac & 0xff;
+        self._set_dac(B1, B2)
+
     arm_fft = _cmd(45, args='BB')
     set_delay = _cmd(49, args='H')
     timer_period = _cmd(51, args='H')

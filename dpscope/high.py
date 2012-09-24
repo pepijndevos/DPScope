@@ -2,9 +2,30 @@ from low import DPScope
 from numpy.fft import fft
 from multiprocessing.pool import ThreadPool
 from Tkinter import BooleanVar
+from threading import Semaphore
 
 def channels(data):
     return data[0::2], data[1::2]
+
+class Task(object):
+
+    def __init__(self, widget, interval):
+        self.widget = widget
+        self.interval = interval
+        self.timer = None
+        self.s = Semaphore()
+
+    def start(self):
+        self.s.acquire()
+        self.timer = self.widget.after(self.interval, self.start)
+        self.s.release()
+        self.task()
+
+    def stop(self):
+        if self.timer:
+            self.s.acquire()
+            self.widget.after_cancel(self.timer)
+            self.s.release()
 
 class Plotter(object):
 
@@ -27,6 +48,8 @@ class Plotter(object):
         self._xy = BooleanVar()
         self._xy.set(False)
 
+        self._USB_voltage = None
+
     @property
     def scope(self):
         return self._scope
@@ -46,6 +69,27 @@ class Plotter(object):
     @property
     def fft(self):
         return self._fft.get()
+    
+    @property
+    def USB_voltage(self):
+        if not self._USB_voltage:
+            self.scope.adcon_from(0)
+            self.scope.set_dac(0, 3000)
+            self.scope.set_dac(1, 3000)
+            real_dac = sum(self.scope.measure_offset()) / 2
+            self.scope.set_dac(0, 0)
+            self.scope.set_dac(1, 0)
+            nominal_dac = 3 * (1023 / 5.)
+            self._USB_voltage = 5. * (nominal_dac / real_dac)
+
+        return self._USB_voltage
+
+    def to_volt(self, adc, gain=1, pregain=1):
+        multiplier = (self.USB_voltage/5.) * (20./256) * pregain * gain
+        return adc * multiplier
+
+    def read_volt(self):
+        return map(self.to_volt, self.scope.read_adc())
 
     def poll(self):
         self.arm()

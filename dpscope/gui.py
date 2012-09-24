@@ -14,6 +14,31 @@ fig = Figure()
 
 pltr = high.Plotter(fig)
 
+class Datalogger(high.Task):
+    def __init__(self, widget, interval):
+        high.Task.__init__(self, widget, interval)
+        self.ch1 = []
+        self.ch2 = []
+
+    def task(self):
+        data = ch1, ch2 = pltr.read_volt()
+        self.ch1.append(ch1)
+        self.ch2.append(ch2)
+        pltr.plot([], self.ch1, [], self.ch2)
+
+stopfn = lambda: None
+
+def start():
+    global stopfn
+    if samepl_mode.get():
+        dl = Datalogger(root, 100)
+        stopfn = dl.stop
+        dl.start()
+
+def stop():
+    stopfn()
+
+
 # the plot
 canvas = FigureCanvasTkAgg(fig, master=root)
 canvas.show()
@@ -47,9 +72,9 @@ trigger = LabelFrame(coll2, text="Trigger")
 trigger.pack(fill=BOTH, expand=1)
 
 # acquisition controls
-Button(acquisition, text="Start").pack(fill=X)
+Button(acquisition, text="Start", command=start).pack(fill=X)
 Button(acquisition, text="Poll", command=pltr.poll).pack(fill=X)
-Button(acquisition, text="Stop").pack(fill=X)
+Button(acquisition, text="Stop", command=stop).pack(fill=X)
 Button(acquisition, text="Clear", command=pltr.plot).pack(fill=X)
 Label(acquisition, text="Average").pack(fill=X)
 Spinbox(acquisition, from_=1, to=100, width=4).pack(fill=X)
@@ -96,7 +121,7 @@ sample_speed.set(speeds[0])
 samepl_mode = BooleanVar()
 Radiobutton(horizontal, text="Scope mode", variable=samepl_mode, value=0).grid(sticky=W, row=0, column=0)
 Radiobutton(horizontal, text="Datalog mode", variable=samepl_mode, value=1).grid(sticky=W, row=0, column=1)
-OptionMenu(horizontal, sample_speed, *gains).grid(sticky=W, row=1, column=0, columnspan=2)
+OptionMenu(horizontal, sample_speed, *speeds).grid(sticky=W, row=1, column=0, columnspan=2)
 Checkbutton(horizontal, text="Pretrigger mode").grid(sticky=W, row=2, column=0, columnspan=2)
 Scale(horizontal, from_=0, to=100, length=200, orient=HORIZONTAL).grid(sticky=W, row=3, column=0, columnspan=2)
 
@@ -115,5 +140,8 @@ Checkbutton(trigger, text="Noise reject").grid(sticky=W, row=1, column=3)
 
 
 pltr.scope = get_port(root)
-pltr.scope.trig_source(0) # no default
+# defaults
+pltr.scope.trig_source(0)
+pltr.scope.adcon_from(0)
+
 root.mainloop()
